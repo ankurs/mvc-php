@@ -1,3 +1,5 @@
 this is as simple implementation for a MVC in php
 
+url flow is as follows -> <app path>/<controller>/<action>/<param 1>/<param 2> ....
+
 edit APP_PATH to your application full path in config.php to make it work
