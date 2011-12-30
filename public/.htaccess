@@ -2,4 +2,6 @@ RewriteEngine On
 
 # rewrite all request to .php files to controller
 RewriteCond %(REQUEST_FILENAME} !-f
-RewriteRule ^(.*)\.php$ controller.php?_controller=$1 [QSA,L]
+RewriteRule ^(.*?)/(.*?)/(.*)$ controller.php?_controller=$1&_action=$2&_params=$3 [QSA,L]
+RewriteRule ^(.*)/(.*)$ controller.php?_controller=$1&_action=$2 [QSA,L]
+RewriteRule ^(.*)$ controller.php?_controller=$1 [QSA,L]

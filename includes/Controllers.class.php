@@ -1,74 +1,129 @@
 <?php
+require_once(APP_PATH."/includes/controllers/ErrorController.php");
 class Controllers
 {
-    public static function getControllerName ($controller)
-    {
-        $controllerfiles = explode("/",$controller);
-        $parts = explode("_",$controllerfiles[count($controllerfiles) -1]);
-        $controller = "";
+    public $controllerName;
 
+    public function clean($string, $startCaps = false)
+    {
+        $string = preg_replace("/[^A-Z0-9a-z\/]*/", "", strval($string));
+        $parts = explode("/",$string);
+        $string = "";
+        
         foreach ($parts as $part)
         {
-            $controller .= ucfirst($part);
+            if (!$startCaps)
+            {
+                $string .= $part;
+                $startCaps = true;
+            }
+            else
+            {
+                $string .= ucfirst($part);
+            }
         }
-
-        return $controller;
+        return $string;
     }
 
-    public static function clean($string)
+    public function getParams()
     {
-        return preg_replace("/[^A-Z0-9a-z]*/","",strval($string));
+        echo "<br/> trying to get params";
+        $params = array();
+        if(isset($_REQUEST['_params']))
+        {
+            $string = strval($_REQUEST['_params']);
+            echo "<br/> params is $string";
+            $parts = explode("/",$string);
+            foreach($parts as $part)
+            {
+                if ($part=='')
+                    continue;
+                $params[] = $part;
+            }
+        }
+        return $params;
     }
 
-    public static function route()
+    public function getAction()
+    {
+        if (isset($_REQUEST['_action']))
+        {
+            return $this->clean($_REQUEST['_action'])."Action";
+        }
+        else
+        {
+            return "defaultAction";
+        }
+    }
+
+    public function getController()
     {
         if (strval($_REQUEST['_controller']) == null || strval($_REQUEST['_controller']) =='' )
         {
-            $controller = "indexController";
+            $controller = "IndexController";
         }
         else
         {
             $controller = strval($_REQUEST['_controller'])."Controller";
         }
-        $controler = Controllers::clean($controller);
+        $controller = $this->clean($controller, true);
 
-        $controllerPath = Controllers::getControllerName($controller);
-        echo "Controller is -> ".$controllerPath."<br/>";
+        echo "Controller is -> ".$controller."<br/>";
         echo "Request for-> ".$_SERVER['REQUEST_URI']."<br/>";
 
-        $controllerFullPath=APP_PATH."/includes/controllers/".$controllerPath.".php";
+        $controllerFullPath=APP_PATH."/includes/controllers/".$controller.".php";
         echo "looking for $controllerFullPath <br/>";
 
         if (file_exists($controllerFullPath))
         {
             require_once($controllerFullPath);
             echo "required $controllerFullPath <br/>";
-            $handler = new $controllerPath();
-            $action = Controllers::clean($_REQUEST['_action']);
-            if ($action)
-            {
-                $action .="Action";
-            }
-            else
-            {
-                $action = "defaultAction";
-            }
-
-            if (is_callable(array($controllerPath, $action)))
-            {
-                $handler->$action();
-            }
-            else
-            {
-                echo "<br>cannot find $action<br/>";
-                $handler->defaultAction();
-            }
-
+            $handler = new $controller();
+            $this->controllerName = $controller;
+            return $handler;
         }
         else
         {
-            echo "<h1>Controller file $controllerPath NOT FOUND</h1>";
+            return null;
+        }
+
+    }
+
+    public function route()
+    {
+        $handler = $this->getController();
+        if ($handler)
+        {
+            $action = $this->getAction();
+            echo "<br> Action is -> $action</br>";            
+
+            $params = $this->getParams();
+            
+            try{
+                if (is_callable(array($this->controllerName, $action)))
+                {
+                    echo "<br> Calling -> $action</br>";
+                    $handler->$action($params);
+                }
+                else
+                {
+                    echo "<br>cannot find $action<br/>";
+                    $handler->defaultAction($params);
+                }
+            }
+            catch(Exception $exp)
+            {
+                $handler = new ErrorController();
+                $handler->defaultAction();
+                echo "<br/>got Exception ".print_r($exp,true);
+            }
+        }
+        else
+        {
+            $handler = new ErrorController();
+            $handler->NotFoundAction();
         }
     }
+
 }
 ?>
