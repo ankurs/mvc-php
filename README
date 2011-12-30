@@ -1,1 +1,3 @@
 this is as simple implementation for a MVC in php
+
+edit APP_PATH to your application full path in config.php to make it work
