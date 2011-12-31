@@ -6,6 +6,7 @@ class Controllers
 
     public function clean($string, $startCaps = false)
     {
+        debug("starting clean on ".strval($string));        
         $string = preg_replace("/[^A-Z0-9a-z\/]*/", "", strval($string));
         $parts = explode("/",$string);
         $string = "";
@@ -22,17 +23,17 @@ class Controllers
                 $string .= ucfirst($part);
             }
         }
+        debug("cleaned string is ".$string);
         return $string;
     }
 
     public function getParams()
     {
-        echo "<br/> trying to get params";
+        debug("trying to get params");
         $params = array();
         if(isset($_REQUEST['_params']))
         {
             $string = strval($_REQUEST['_params']);
-            echo "<br/> params is $string";
             $parts = explode("/",$string);
             foreach($parts as $part)
             {
@@ -41,6 +42,7 @@ class Controllers
                 $params[] = $part;
             }
         }
+        debug("params is".print_r($params,true));
         return $params;
     }
 
@@ -68,16 +70,16 @@ class Controllers
         }
         $controller = $this->clean($controller, true);
 
-        echo "Controller is -> ".$controller."<br/>";
-        echo "Request for-> ".$_SERVER['REQUEST_URI']."<br/>";
+        debug('Controller is -> '.$controller);
+        debug('Request for-> '.$_SERVER['REQUEST_URI']);
 
-        $controllerFullPath=APP_PATH."/includes/controllers/".$controller.".php";
-        echo "looking for $controllerFullPath <br/>";
+        $controllerFullPath=APP_PATH.'/includes/controllers/'.$controller.'.php';
+        debug('looking for '.$controllerFullPath);
 
         if (file_exists($controllerFullPath))
         {
             require_once($controllerFullPath);
-            echo "required $controllerFullPath <br/>";
+            debug('required '.$controllerFullPath);
             $handler = new $controller();
             $this->controllerName = $controller;
             return $handler;
@@ -91,37 +93,38 @@ class Controllers
 
     public function route()
     {
+        $action = $this->getAction();
+        debug('Action is -> '.$action);
+
+        $params = $this->getParams();
+        debug('got params -> '.print_r($params,true));
+
         $handler = $this->getController();
         if ($handler)
         {
-            $action = $this->getAction();
-            echo "<br> Action is -> $action</br>";            
-
-            $params = $this->getParams();
-            
             try{
                 if (is_callable(array($this->controllerName, $action)))
                 {
-                    echo "<br> Calling -> $action</br>";
+                    debug('executing action -> '.$action);
                     $handler->$action($params);
                 }
                 else
                 {
-                    echo "<br>cannot find $action<br/>";
+                    debug('cannot find action -> '.$action);
                     $handler->defaultAction($params);
                 }
             }
             catch(Exception $exp)
             {
                 $handler = new ErrorController();
-                $handler->defaultAction();
-                echo "<br/>got Exception ".print_r($exp,true);
+                $handler->defaultAction($params);
+                debug('got Exception while executing action -> '.$action.' error -> '.print_r($exp,true));
             }
         }
         else
         {
             $handler = new ErrorController();
-            $handler->NotFoundAction();
+            $handler->NotFoundAction(array("action" => $action, "params" => $params));
         }
     }
 

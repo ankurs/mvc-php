@@ -18,10 +18,9 @@ class IndexController
     public function defaultAction($params)
     {
         echo "<h1> Hi from indexController - defaultAction</h1>";
-        echo "<br/>got Params -> ".print_r($params,true);
     }
 }
 
-echo "<br/>controller finished</br>";
+debug('controller finished');
 
 ?>
