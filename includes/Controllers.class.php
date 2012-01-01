@@ -1,5 +1,7 @@
 <?php
+
 require_once(APP_PATH."/includes/controllers/ErrorController.php");
+
 class Controllers
 {
     public $controllerName;
@@ -78,7 +80,7 @@ class Controllers
 
         if (file_exists($controllerFullPath))
         {
-            require_once($controllerFullPath);
+            include_once($controllerFullPath);
             debug('required '.$controllerFullPath);
             $handler = new $controller();
             $this->controllerName = $controller;
@@ -99,10 +101,10 @@ class Controllers
         $params = $this->getParams();
         debug('got params -> '.print_r($params,true));
 
-        $handler = $this->getController();
-        if ($handler)
-        {
-            try{
+        try{
+            $handler = $this->getController();
+            if ($handler)
+            {
                 if (is_callable(array($this->controllerName, $action)))
                 {
                     debug('executing action -> '.$action);
@@ -114,17 +116,17 @@ class Controllers
                     $handler->defaultAction($params);
                 }
             }
-            catch(Exception $exp)
+            else
             {
                 $handler = new ErrorController();
-                $handler->defaultAction($params);
-                debug('got Exception while executing action -> '.$action.' error -> '.print_r($exp,true));
+                $handler->notFoundAction(array("action" => $action, "params" => $params));
             }
         }
-        else
+        catch(Exception $exp)
         {
             $handler = new ErrorController();
-            $handler->NotFoundAction(array("action" => $action, "params" => $params));
+            $handler->defaultAction($params);
+            debug('got Exception while executing action -> '.$action.' error -> '.print_r($exp,true));
         }
     }
 
