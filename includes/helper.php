@@ -28,4 +28,12 @@ function debug($string, $level=1)
     }
 }
 
+function addDefine($key, $value)
+{
+    if (!defined($key))
+    {
+        define($key, $value);
+    }
+}
+
 ?>

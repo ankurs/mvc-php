@@ -3,3 +3,5 @@ this is as simple implementation for a MVC in php
 url flow is as follows -> <app path>/<controller>/<action>/<param 1>/<param 2> ....
 
 edit APP_PATH to your application full path in config.php to make it work
+
+to load config from outside this directory (when mvc-php is used as a module) set MVC_OVERRIDE_CONFIG_FILE to the path of the config file to apply overrides
