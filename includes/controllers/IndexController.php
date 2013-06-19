@@ -6,7 +6,6 @@ class IndexController
 
     public function __construct()
     {
-        $this->smarty = new Smarty();
     }
 
     public function abcAction($params)
