@@ -1,4 +1,5 @@
 RewriteEngine On
+#RewriteBase /path/
 
 # rewrite all request to .php files to controller
 RewriteCond %(REQUEST_FILENAME} !-f
