@@ -1,6 +1,6 @@
 <?php
 // get app config
-require_once(APP_PATH."/config.php");
+require_once(MVC_APP_PATH."/config.php");
 
 $con = new Controllers();
 $con->route();

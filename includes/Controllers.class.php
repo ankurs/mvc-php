@@ -1,6 +1,6 @@
 <?php
 
-require_once(CONTROLLER_PATH."/ErrorController.php");
+require_once(MVC_CONTROLLER_PATH."/ErrorController.php");
 
 class Controllers
 {
@@ -75,7 +75,7 @@ class Controllers
         debug('Controller is -> '.$controller);
         debug('Request for-> '.$_SERVER['REQUEST_URI']);
 
-        $controllerFullPath=CONTROLLER_PATH.$controller.'.php';
+        $controllerFullPath=MVC_CONTROLLER_PATH.$controller.'.php';
         debug('looking for '.$controllerFullPath);
 
         if (file_exists($controllerFullPath))
